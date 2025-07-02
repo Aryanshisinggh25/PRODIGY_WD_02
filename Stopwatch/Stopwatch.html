@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+
+    #display {
+      font-size: 2.5rem;
+      margin: 20px 0;
+    }
+
+    .buttons button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .buttons button:hover {
+      background-color: #2980b9;
+    }
+
+    .buttons button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    #laps {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    #laps li {
+      text-align: left;
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stopwatch</h1>
+    <div id="display">00:00:00</div>
+    <div class="buttons">
+      <button id="start">Start</button>
+      <button id="pause" disabled>Pause</button>
+      <button id="reset" disabled>Reset</button>
+      <button id="lap" disabled>Lap</button>
+    </div>
+    <ul id="laps"></ul>
+  </div>
+
+  <script>
+    let startTime, interval;
+    let elapsedTime = 0;
+    let running = false;
+
+    const display = document.getElementById("display");
+    const laps = document.getElementById("laps");
+    const startButton = document.getElementById("start");
+    const pauseButton = document.getElementById("pause");
+    const resetButton = document.getElementById("reset");
+    const lapButton = document.getElementById("lap");
+
+    // Start Button
+    startButton.addEventListener("click", () => {
+      if (!running) {
+        startTime = Date.now() - elapsedTime;
+        interval = setInterval(updateTime, 100);
+        running = true;
+        startButton.disabled = true;
+        pauseButton.disabled = false;
+        resetButton.disabled = false;
+        lapButton.disabled = false;
+      }
+    });
+
+    // Pause Button
+    pauseButton.addEventListener("click", () => {
+      if (running) {
+        clearInterval(interval);
+        elapsedTime = Date.now() - startTime;
+        running = false;
+        startButton.disabled = false;
+        pauseButton.disabled = true;
+      }
+    });
+
+    // Reset Button
+    resetButton.addEventListener("click", () => {
+      clearInterval(interval);
+      running = false;
+      elapsedTime = 0;
+      display.textContent = "00:00:00";
+      laps.innerHTML = "";
+      startButton.disabled = false;
+      pauseButton.disabled = true;
+      resetButton.disabled = true;
+      lapButton.disabled = true;
+    });
+
+    // Lap Button
+    lapButton.addEventListener("click", () => {
+      if (running) {
+        const lapTime = formatTime(Date.now() - startTime);
+        const li = document.createElement("li");
+        li.textContent = lapTime;
+        laps.appendChild(li);
+      }
+    });
+
+    // Update the displayed time
+    function updateTime() {
+      const time = Date.now() - startTime;
+      display.textContent = formatTime(time);
+    }
+
+    // Format the time correctly
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      const milliseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, "0");
+      return `${minutes}:${seconds}:${milliseconds}`;  // Corrected template literal
+    }
+  </script>
+</body>
+</html>
